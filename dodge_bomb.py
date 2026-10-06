@@ -1,7 +1,7 @@
+import math
 import os
 import random
 import sys
-import pygame as pg
 import time
 import pygame as pg
 
@@ -28,6 +28,27 @@ def check_bound(rect: pg.Rect) -> tuple[bool, bool] :
     if rect.top < 0 or HEIGHT < rect.bottom:  # 縦方向判定
         tate = False
     return yoko, tate
+
+
+def calc_orientation(org: pg.Rect, dst: pg.Rect,
+                     current_xy: tuple[float, float]) -> tuple[float, float]:
+    """
+    引数1 org：爆弾Rect
+    引数2 dst：こうかとんRect
+    引数3 current_xy：現在の爆弾の速度ベクトル（vx, vy）
+    戻り値：爆弾が移動すべき方向を表す速度ベクトル（vx, vy）
+    爆弾とこうかとんの距離が300未満なら,慣性として
+    current_xyをそのまま返す
+    """
+    # 爆弾からこうかとんへの差ベクトル
+    diff_x = dst.centerx - org.centerx
+    diff_y = dst.centery - org.centery
+    norm = math.hypot(diff_x, diff_y)
+    if norm < 300:  # 近すぎるときは進路を変えない
+        return current_xy
+    # ノルムが√50（＝元の速度 √(5^2+5^2)）になるよう正規化
+    scale = math.sqrt(50) / norm
+    return diff_x * scale, diff_y * scale
 
 
 def get_kk_imgs() -> dict[tuple[int, int], pg.Surface]:
@@ -116,14 +137,7 @@ def main():
 
         key_lst = pg.key.get_pressed()
         sum_mv = [0, 0]
-        # if key_lst[pg.K_UP]:
-        #     sum_mv[1] -= 5
-        # if key_lst[pg.K_DOWN]:
-        #     sum_mv[1] += 5
-        # if key_lst[pg.K_LEFT]:
-        #     sum_mv[0] -= 5
-        # if key_lst[pg.K_RIGHT]:
-        #     sum_mv[0] += 5
+    
         for k, tpl in DELTA.items():
             if key_lst[k]:
                 sum_mv[0] += tpl[0]  # 横方向判定
@@ -134,7 +148,8 @@ def main():
         if check_bound(kk_rct) != (True,True): #  どこかしらはみでてる
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1]) #  さっきの動きのキャンセル
         screen.blit(kk_img, kk_rct)
-
+        
+        vx, vy = calc_orientation(bb_rct, kk_rct, (vx, vy))
         bb_rct.move_ip(vx,vy)
         yoko, tate = check_bound(bb_rct)
         if not yoko:  # 横方向にはみ出たら反転
