@@ -48,6 +48,11 @@ def main():
         for event in pg.event.get():
             if event.type == pg.QUIT: 
                 return
+
+        if kk_rct.colliderect(bb_rct):
+            print("gsme over")
+            return
+            
         screen.blit(bg_img, [0, 0]) 
 
         key_lst = pg.key.get_pressed()
@@ -64,8 +69,8 @@ def main():
             if key_lst[k]:
                 sum_mv[0] += tpl[0]  # 横方向判定
                 sum_mv[1] += tpl[1]  # 縦方向判定  
-
         kk_rct.move_ip(sum_mv)
+
         if check_bound(kk_rct) != (True,True): #  どこかしらはみでてる
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1]) #  さっきの動きのキャンセル
         screen.blit(kk_img, kk_rct)
