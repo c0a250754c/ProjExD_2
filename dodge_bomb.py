@@ -1,8 +1,8 @@
-import math
 import os
 import random
 import sys
 import time
+import math
 import pygame as pg
 
 
@@ -110,7 +110,7 @@ def main():
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     bg_img = pg.image.load("fig/pg_bg.jpg")  
     kk_imgs = get_kk_imgs()  
-    kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
+    kk_img = kk_imgs[(0, 0)]
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300, 200
     
